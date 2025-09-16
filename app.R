@@ -33,11 +33,11 @@ ui <- page_fluid(
 
 server <- function(input, output) {
   # Input validation
-  iv <- InputValidator$new()
-  iv$add_rule("noun1", sv_required())
-  iv$add_rule("verb", sv_required())
-  iv$add_rule("adjective", sv_required())
-  iv$add_rule("adverb", sv_required())
+  iv <- shinyvalidate::InputValidator$new()
+  iv$add_rule("noun1", shinyvalidate::sv_required())
+  iv$add_rule("verb", shinyvalidate::sv_required())
+  iv$add_rule("adjective", shinyvalidate::sv_required())
+  iv$add_rule("adverb", shinyvalidate::sv_required())
   iv$enable()
   
   # Live updating story
