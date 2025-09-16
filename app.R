@@ -1,37 +1,52 @@
 library(shiny)
+library(bslib)
+library(shinyvalidate)
 
 generate_story <- function(noun, verb, adjective, adverb) {
   glue::glue(
-    "
-    Once upon a time, there was a {adjective} {noun} who loved to
-    {verb} {adverb}. It was the funniest thing ever!
-  "
+    "Once upon a time, there was a {adjective} {noun} who loved to {verb} {adverb}. 
+    One day, while {verb}ing through the forest, the {noun} discovered a magical 
+    {adjective} treasure that granted wishes. It was the most {adjective} day ever!"
   )
 }
 
-ui <- fluidPage(
+ui <- page_fluid(
+  theme = bs_theme(bootswatch = "flatly"),
   titlePanel("Mad Libs Game"),
-  sidebarLayout(
-    sidebarPanel(
-      textInput("noun1", "Enter a noun:", ""),
-      textInput("verb", "Enter a verb:", ""),
-      textInput("adjective", "Enter an adjective:", ""),
-      textInput("adverb", "Enter an adverb:", ""),
-      actionButton("submit", "Create Story")
+  
+  layout_sidebar(
+    sidebar = sidebar(
+      textInput("noun1", "Enter a noun:", placeholder = "cat"),
+      textInput("verb", "Enter a verb:", placeholder = "dance"),
+      textInput("adjective", "Enter an adjective:", placeholder = "funny"),
+      textInput("adverb", "Enter an adverb:", placeholder = "quickly")
     ),
-    mainPanel(
-      h3("Your Mad Libs Story:"),
-      textOutput("story")
+    
+    card(
+      card_header("Your Mad Libs Story"),
+      card_body(
+        textOutput("story")
+      )
     )
   )
 )
 
 server <- function(input, output) {
-  story <- eventReactive(input$submit, {
-    generate_story(input$noun1, input$verb, input$adjective, input$adverb)
-  })
+  # Input validation
+  iv <- InputValidator$new()
+  iv$add_rule("noun1", sv_required())
+  iv$add_rule("verb", sv_required())
+  iv$add_rule("adjective", sv_required())
+  iv$add_rule("adverb", sv_required())
+  iv$enable()
+  
+  # Live updating story
   output$story <- renderText({
-    story()
+    if (iv$is_valid()) {
+      generate_story(input$noun1, input$verb, input$adjective, input$adverb)
+    } else {
+      "Fill in all the fields to see your story!"
+    }
   })
 }
 
